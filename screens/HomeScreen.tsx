@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -12,8 +12,21 @@ import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import RechargeGrid from '../components/RechargeGrid';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen: React.FC = () => {
+ 
+useEffect(()=>{
+   const getUserData = async () => {
+  const stored = await AsyncStorage.getItem('userData');
+  if (stored) {
+    const userData = JSON.parse(stored);
+    console.log('User Data:', userData);
+  }
+};
+
+getUserData();
+},[])
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
