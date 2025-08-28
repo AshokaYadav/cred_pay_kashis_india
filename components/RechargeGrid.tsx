@@ -11,6 +11,28 @@ import { RootStackParamList } from '../navigation/RootNavigator ';
 
 const RechargeGrid = () => {
     const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+    //i want here to show Serivice item based on arrya of object i get  do remember one thing over here
+    // if name Dth  <ServiceItem icon={<Entypo name="tv" size={24} color="#28a745" />} label="DTH" />
+    //if prepaid <ServiceItem
+        //   icon={<FontAwesome name="mobile" size={24} color="#28a745" />}
+        //   label="Mobile"
+        //   onPress={() => navigation.navigate('Recharge')}
+        // />
+
+        
+
+//      {
+//             "id": "091f5af7-4fd0-4378-8947-9177c2c59ff0",
+//             "name": "Dth",
+//             "status": "ACTIVE"
+//         },
+//         {
+//             "id": "1080e6d9-4156-4aed-8e05-3407c7a17a8c",
+//             "name": "Prepaid",
+//             "status": "ACTIVE"
+//         }
+
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>Recharge & Pay Bills</Text>
@@ -57,3 +79,4 @@ const styles = StyleSheet.create({
 });
 
 export default RechargeGrid;
+

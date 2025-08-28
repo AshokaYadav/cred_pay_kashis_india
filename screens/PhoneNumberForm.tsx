@@ -1,19 +1,25 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TextInput, Alert, TouchableOpacity, Image, StyleSheet } from 'react-native';
-import CheckBox from '@react-native-community/checkbox';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import React, { useState, useRef, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Alert,
+  TouchableOpacity,
+  Image,
+} from "react-native";
+import CheckBox from "@react-native-community/checkbox";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
 
-// ✅ Navigation types define karna zaroori hai
 type RootStackParamList = {
   PhoneNumberForm: undefined;
-  OTPScreen: { phoneNumber: string }; // 👈 phoneNumber param bhejna hai
-  RegisterScreen: { phoneNumber: string }; // 👈 yahan bhi bhejna hai
+  OTPScreen: { phoneNumber: string };
+  RegisterScreen: { phoneNumber: string };
 };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'PhoneNumberForm'>;
+type Props = NativeStackScreenProps<RootStackParamList, "PhoneNumberForm">;
 
 const PhoneNumberForm: React.FC<Props> = ({ navigation }) => {
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   const inputRef = useRef<TextInput>(null);
 
@@ -21,138 +27,83 @@ const PhoneNumberForm: React.FC<Props> = ({ navigation }) => {
     inputRef.current?.focus();
   }, []);
 
-
   const handleSubmit = async () => {
     if (!phoneNumber.trim()) {
-      Alert.alert('Error', 'Please enter your phone number.');
+      Alert.alert("Error", "Please enter your phone number.");
       return;
     }
 
     try {
-      const response = await fetch(`https://api.recharge.kashishindiapvtltd.com/auth/login-app`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mobile: phoneNumber }),
-      });
-
-      console.log(response);
-
-      
+      const response = await fetch(
+        `https://api.recharge.kashishindiapvtltd.com/auth/login-app`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ mobile: phoneNumber }),
+        }
+      );
 
       if (response.status === 200) {
-        navigation.navigate('OTPScreen', { phoneNumber });
+        navigation.navigate("OTPScreen", { phoneNumber });
       } else if (response.status === 404) {
-        navigation.navigate('RegisterScreen', { phoneNumber });
-
+        navigation.navigate("RegisterScreen", { phoneNumber });
       } else {
         const error = await response.json();
-        Alert.alert('Error', error.message || 'Unexpected response');
+        Alert.alert("Error", error.message || "Unexpected response");
       }
     } catch (error: any) {
       console.log(error);
-      Alert.alert('Network Error', error.message || 'Something went wrong');
+      Alert.alert("Network Error", error.message || "Something went wrong");
     }
   };
 
-  // const handleSubmit = () => {
-  //   if (!phoneNumber.trim()) {
-  //     Alert.alert('Error', 'Please enter your phone number.');
-  //     return;
-  //   }
-  //   console.log('Phone Number:', phoneNumber);
-  //   navigation.navigate('OTPScreen'); // ✅ Type-safe navigation
-  // };
-
   return (
-    <View style={styles.mainContainer}>
-      <Image source={require('../assets/load.jpg')} style={styles.logo} />
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Phone Number</Text>
+    <View className="flex-1 w-full bg-white items-center justify-center">
+      <Image
+        source={require("../assets/load.jpg")}
+        className="w-[300px] h-[100px] mb-5"
+        resizeMode="contain"
+      />
+
+      <View className="w-full px-5">
+        <Text className="text-lg font-bold mb-2 text-green-600">
+          Phone Number
+        </Text>
+
         <TextInput
           ref={inputRef}
-          style={styles.input}
+          className="h-12 border border-gray-300 rounded-full px-4 text-base bg-white mb-5"
           placeholder="(+91) 123 456 7890"
           keyboardType="phone-pad"
           value={phoneNumber}
           onChangeText={setPhoneNumber}
         />
-        <View style={styles.checkboxContainer}>
+
+        <View className="flex-row items-center mb-5">
           <CheckBox
             value={isChecked}
             onValueChange={setIsChecked}
-            tintColors={{ true: 'green', false: 'green' }}
+            tintColors={{ true: "green", false: "green" }}
           />
-          <Text style={styles.checkboxText}>
-            By proceeding, you allow KredPay to fetch your current and future plan expiry information.
+          <Text className="ml-2 text-sm text-gray-600 flex-1">
+            By proceeding, you allow KredPay to fetch your current and future
+            plan expiry information.
           </Text>
         </View>
-        <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-          <Text style={styles.buttonText}>Sign In using Mobile</Text>
+
+        <TouchableOpacity
+          onPress={handleSubmit}
+          className="bg-green-600 py-4 rounded-full items-center"
+        >
+          <Text className="text-white text-lg font-bold">
+            Sign In using Mobile
+          </Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  mainContainer: {
-    width: '100%',
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  logo: {
-    width: 300,
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  formContainer: {
-    width: '100%',
-    padding: 20,
-    borderRadius: 10,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: 'green',
-  },
-  input: {
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 25,
-    marginBottom: 20,
-    paddingHorizontal: 15,
-    fontSize: 16,
-    backgroundColor: '#fff',
-  },
-  checkboxContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  checkboxText: {
-    marginLeft: 10,
-    fontSize: 14,
-    color: '#555',
-    flex: 1,
-  },
-  button: {
-    backgroundColor: '#00C72C',
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
 
 export default PhoneNumberForm;

@@ -106,6 +106,9 @@ const OTPScreen: React.FC<Props> = ({navigation, route}) => {
       <TouchableOpacity style={styles.button} onPress={handleVerifyOTP}>
         <Text style={styles.buttonText}>Verify OTP</Text>
       </TouchableOpacity>
+      {/* <Text className="font-bold mb-5 border border-red-500 p-2 text-red-800">
+        OTP Sent on (<Text className="text-blue-600">+91 22{phoneNumber}</Text>)
+      </Text> */}
     </View>
   );
 };

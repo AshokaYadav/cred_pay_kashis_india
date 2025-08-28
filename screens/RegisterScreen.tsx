@@ -104,6 +104,7 @@ const RegisterScreen: React.FC<Props> = ({ route, navigation }) => {
               style={styles.input}
               placeholder="Your Name"
               value={name}
+              placeholderTextColor="#000"
               onChangeText={setName}
             />
 
@@ -112,6 +113,7 @@ const RegisterScreen: React.FC<Props> = ({ route, navigation }) => {
               placeholder="Mobile Number"
               keyboardType="phone-pad"
               value={mobile}
+              placeholderTextColor="#000"
               onChangeText={setMobile}
             />
 
@@ -120,6 +122,7 @@ const RegisterScreen: React.FC<Props> = ({ route, navigation }) => {
               placeholder="Your E-mail"
               keyboardType="email-address"
               value={email}
+              placeholderTextColor="#000"  
               onChangeText={setEmail}
             />
 
@@ -208,6 +211,9 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     marginBottom: 15,
     fontSize: 16,
+    
+    //  backgroundColor: '#0049FF', // ya #fff
+  color: '#000', // text color  
   },
   inviteCode: {
     color: '#0049FF',

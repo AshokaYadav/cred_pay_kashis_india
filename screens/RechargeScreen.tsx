@@ -5,13 +5,11 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
-  StyleSheet,
   FlatList,
   ActivityIndicator,
   Image,
   Platform,
 } from 'react-native';
-import Ionicons from 'react-native-vector-icons/Ionicons';
 import {API_TOKEN} from '../config';
 
 import {
@@ -20,12 +18,20 @@ import {
   PlansResponse,
   plansRes,
   OperatorCircleResponse,
+  Operator,
+  Circle,
 } from '../types';
 
 import {useNavigation} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/RootNavigator ';
-
+import {useWallet} from '../hooks/useWallet';
+import LoadingSpinner from '../components/LoadingSpinner';
+import PlansList from '../components/PlansList';
+import PlanCard from '../components/PlanCard';
+import NoPlansForCategory from '../components/NoPlansForCategory';
+import ErrorDisplay from '../components/ErrorDisplay';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export default function RechargeScreen() {
   const [mobileNumber, setMobileNumber] = useState('');
@@ -37,9 +43,14 @@ export default function RechargeScreen() {
   const [searchAmount, setSearchAmount] = useState('');
   const [showFullUI, setShowFullUI] = useState(false);
 
+  const [operatorData, setOperatorData] = useState<Operator | null>(null);
+  const [circleData, setCircleData] = useState<Circle | null>(null);
 
-   const navigation =
-      useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const {data, loading: lodd, error: err} = useWallet();
+  console.log('this', data, lodd, err);
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const processMobileNumber = useCallback((number: string): string | null => {
     if (!number) return null;
@@ -60,6 +71,7 @@ export default function RechargeScreen() {
     setMobileNumber(text.slice(-10));
 
     const processed = processMobileNumber(text);
+    console.log(processed);
 
     if (processed) {
       setProcessedMobileNumber(processed);
@@ -99,6 +111,15 @@ export default function RechargeScreen() {
 
         console.log(circleData);
 
+        // Store operator and circle data
+        if (circleData.data && circleData.data.operator) {
+          setOperatorData(circleData.data.operator);
+        }
+
+        if (circleData.data && circleData.data.circle) {
+          setCircleData(circleData.data.circle);
+        }
+
         const plansResponse = await fetch(
           'https://api.recharge.kashishindiapvtltd.com/recharge/fetch-plans',
           {
@@ -119,7 +140,7 @@ export default function RechargeScreen() {
         if (!plansData.data?.RDATA) throw new Error('No plans found');
 
         setPlansData(plansData.data);
-        console.log(plansData.data);
+        console.log(plansData);
         const firstTab = Object.keys(plansData.data.RDATA)[0];
         setActiveTab(firstTab || '');
         setShowFullUI(true);
@@ -153,53 +174,89 @@ export default function RechargeScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View className="flex-1 bg-gray-50">
       {/* Fixed Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>
-          {plansData?.Operator || 'Operator'}
-        </Text>
-        <Text style={styles.headerSubtitle}>
-          {plansData?.Circle || 'Circle'} | Mobile:{' '}
-          {processedMobileNumber || 'XXXXXXX'}
-        </Text>
+      {/* Fixed Header */}
+      {/* Header */}
+      <View
+        className="bg-white px-4 pt-4 pb-4 flex-row items-center 
+              shadow-md rounded-b-2xl"
+        style={{paddingTop: Platform.OS === 'ios' ? 50 : 50}}>
+        {/* Back Button */}
+        <TouchableOpacity onPress={() => navigation.goBack()} className="mr-3">
+          <Ionicons name="arrow-back" size={32} color="#16a34a" />
+          {/* Thoda chhota size & green color professional lagta hai */}
+        </TouchableOpacity>
+
+        {/* Header Title / Operator Info */}
+        {!showFullUI ? (
+          <Text className="text-xl font-semibold text-gray-800">
+            Recharge or Pay Mobile Bill
+          </Text>
+        ) : (
+          <View className="flex-row items-center">
+            {operatorData?.image_url ? (
+              <Image
+                source={{
+                  uri: `https://api.recharge.kashishindiapvtltd.com/${operatorData.image_url}`,
+                }}
+                className="w-10 h-10 mr-3 rounded-full bg-white border border-gray-300"
+                resizeMode="cover"
+              />
+            ) : (
+              <View className="w-10 h-10 mr-3 rounded-full bg-green-100 justify-center items-center">
+                <Text className="text-green-700 font-bold text-lg">
+                  {operatorData?.name?.charAt(0) || 'O'}
+                </Text>
+              </View>
+            )}
+
+            <View>
+              <Text className="text-lg font-semibold text-gray-900">
+                {operatorData?.name || 'Operator'}
+              </Text>
+              <Text className="text-sm text-gray-600">
+                {processedMobileNumber}
+              </Text>
+              <Text className="text-sm text-gray-600">
+                {circleData?.name || 'Circle'} • Prepaid
+              </Text>
+            </View>
+          </View>
+        )}
       </View>
 
       {/* Main Content */}
       <ScrollView
-        contentContainerStyle={[
-          styles.contentContainer,
-          {paddingTop: showFullUI ? 100 : 20},
-        ]}>
+        contentContainerStyle={{paddingTop: showFullUI ? 0 : 0}}
+        className="px-4">
         {/* Mobile Number Input - Always visible */}
-        <View style={styles.inputContainer}>
-          <Text style={styles.label}>Enter Mobile Number:</Text>
-          <TextInput
-            style={styles.input}
-            value={mobileNumber}
-            onChangeText={handleMobileNumberChange}
-            placeholder="Enter 10-digit mobile number"
-            keyboardType="phone-pad"
-            maxLength={14}
-          />
-          <Text style={styles.hintText}>With or without code (+91, 0, 91)</Text>
-          {mobileNumber && !processedMobileNumber && (
-            <Text style={styles.errorText}>
-              Please enter valid 10-digit number
-            </Text>
-          )}
-        </View>
+
+        {!showFullUI && (
+          <View className="mb-5">
+            <TextInput
+              className="bg-white border border-green-500 rounded-full px-4 py-3 text-base"
+              value={mobileNumber}
+              onChangeText={handleMobileNumberChange}
+              placeholder="Enter 10-digit mobile number"
+              keyboardType="phone-pad"
+              maxLength={14}
+            />
+          </View>
+        )}
 
         {/* Show plans UI only if number is valid */}
         {showFullUI && plansData?.RDATA && (
           <>
-            <View style={styles.inputContainer}>
-              <Text style={styles.label}>Search by Amount:</Text>
+            <View className="mb-5">
+              {/* <Text className="text-sm font-medium text-gray-600 mb-2">
+                Search by Amount:
+              </Text> */}
               <TextInput
-                style={styles.input}
+                className="bg-white border border-green-300 rounded-full px-4 py-3 text-base"
                 value={searchAmount}
                 onChangeText={handleSearchChange}
-                placeholder="Enter amount"
+                placeholder="Search By Amount"
                 keyboardType="numeric"
               />
             </View>
@@ -209,24 +266,24 @@ export default function RechargeScreen() {
             ) : (
               <>
                 {!searchAmount && (
-                  <View style={styles.tabContainer}>
+                  <View className="mb-4">
                     <ScrollView
                       horizontal
                       showsHorizontalScrollIndicator={false}>
-                      <View style={styles.tabInnerContainer}>
+                      <View className="flex-row pb-2">
                         {tabCategories.map(cat => (
                           <TouchableOpacity
                             key={cat}
-                            style={[
-                              styles.tabButton,
-                              activeTab === cat && styles.activeTabButton,
-                            ]}
+                            className={`rounded-full px-4 py-2 mr-2 ${
+                              activeTab === cat ? 'bg-green-600' : 'bg-gray-100'
+                            }`}
                             onPress={() => setActiveTab(cat)}>
                             <Text
-                              style={[
-                                styles.tabButtonText,
-                                activeTab === cat && styles.activeTabButtonText,
-                              ]}>
+                              className={`text-sm font-medium ${
+                                activeTab === cat
+                                  ? 'text-white'
+                                  : 'text-gray-600'
+                              }`}>
                               {cat}
                             </Text>
                           </TouchableOpacity>
@@ -237,18 +294,30 @@ export default function RechargeScreen() {
                 )}
 
                 {searchAmount && (
-                  <View style={styles.searchHeader}>
-                    <Text style={styles.searchTitle}>
+                  <View className="mb-4">
+                    <Text className="text-lg font-semibold text-gray-800">
                       Showing plans with ₹{searchAmount}
                     </Text>
                     <TouchableOpacity onPress={() => setSearchAmount('')}>
-                      <Text style={styles.clearSearchText}>Clear search</Text>
+                      <Text className="text-green-600 text-sm mt-1 font-medium">
+                        Clear search
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
 
                 {activePlans.length > 0 ? (
-                  <PlansList plans={activePlans} onNavigate={(plan) => navigation.navigate('PlanDetailsScreen1', { plan })}  />
+                  <PlansList
+                    plans={activePlans}
+                    onNavigate={plan =>
+                      navigation.navigate('PlanDetailsScreen1', {
+                        plan,
+                        mobileNumber: processedMobileNumber,
+                        circleData,
+                        operatorData,
+                      })
+                    }
+                  />
                 ) : (
                   <NoPlansForCategory />
                 )}
@@ -260,283 +329,3 @@ export default function RechargeScreen() {
     </View>
   );
 }
-
-// --- UI Components
-
-function LoadingSpinner() {
-  return (
-    <View style={styles.spinnerContainer}>
-      <ActivityIndicator size="large" color="#E53E3E" />
-    </View>
-  );
-}
-function PlansList({
-  plans,
-  onNavigate,
-}: {
-  plans: Plan[];
-  onNavigate: (plan: Plan) => void;
-}) {
-  return (
-    <View style={styles.plansListContainer}>
-      {plans.map((plan, index) => (
-        <PlanCard key={index} plan={plan} onPress={() => onNavigate(plan)}  />
-      ))}
-    </View>
-  );
-}
-
-function PlanCard({
-  plan,
-  onPress,
-}: {
-  plan: Plan;
-  onPress: () => void;
-}) {
-  return (
-    <View style={styles.planCard}>
-      <View style={styles.planHeader}>
-        <View>
-          <Text style={styles.planPrice}>₹{plan.rs}</Text>
-          <Text style={styles.validityText}>{plan.validity}</Text>
-        </View>
-        <TouchableOpacity style={styles.rechargeButton} onPress={onPress}>
-          <Text style={styles.rechargeButtonText}>Recharge Now</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.divider} />
-      <View style={styles.planDetails}>
-        {plan.desc.split('|').map((line, i) => (
-          <View key={i} style={styles.detailItem}>
-            <Ionicons
-              name="checkmark-circle"
-              size={16}
-              color="#4CAF50"
-              style={styles.bulletIcon}
-            />
-            <Text style={styles.planDetailItem}>{line.trim()}</Text>
-          </View>
-        ))}
-      </View>
-    </View>
-  );
-}
-
-function NoPlansForCategory() {
-  return (
-    <View style={styles.noPlansContainer}>
-      <Ionicons name="sad-outline" size={48} color="#718096" />
-      <Text style={styles.noPlansText}>No plans found for this category</Text>
-    </View>
-  );
-}
-
-function ErrorDisplay({error, onRetry}: {error: string; onRetry: () => void}) {
-  return (
-    <View style={styles.errorContainer}>
-      <Ionicons name="warning-outline" size={48} color="#E53E3E" />
-      <Text style={styles.errorMessage}>{error}</Text>
-      <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-        <Text style={styles.retryButtonText}>Try Again</Text>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#F7FAFC',
-  },
-  header: {
-    position: 'relative',
-    top: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#E53E3E',
-    padding: 16,
-    zIndex: 10,
-    paddingTop: Platform.OS === 'ios' ? 50 : 16,
-  },
-  headerTitle: {
-    color: 'white',
-    fontSize: 20,
-    fontWeight: '600',
-  },
-  headerSubtitle: {
-    color: 'white',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  contentContainer: {
-    paddingHorizontal: 16,
-    // paddingBottom: 20,
-  },
-  inputContainer: {
-    marginBottom: 20,
-  },
-  label: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#4A5568',
-    marginBottom: 8,
-  },
-  input: {
-    backgroundColor: 'white',
-    borderWidth: 1,
-    borderColor: '#E2E8F0',
-    borderRadius: 25,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
-  },
-  hintText: {
-    fontSize: 12,
-    color: '#718096',
-    marginTop: 4,
-  },
-  errorText: {
-    fontSize: 12,
-    color: '#E53E3E',
-    marginTop: 4,
-  },
-  tabContainer: {
-    marginBottom: 16,
-  },
-  tabInnerContainer: {
-    flexDirection: 'row',
-    paddingBottom: 8,
-  },
-  tabButton: {
-    backgroundColor: '#EDF2F7',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    marginRight: 8,
-  },
-  activeTabButton: {
-    backgroundColor: '#E53E3E',
-  },
-  tabButtonText: {
-    color: '#4A5568',
-    fontSize: 14,
-  },
-  activeTabButtonText: {
-    color: 'white',
-  },
-  searchHeader: {
-    marginBottom: 16,
-  },
-  searchTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#2D3748',
-  },
-  clearSearchText: {
-    color: '#E53E3E',
-    fontSize: 14,
-    marginTop: 4,
-  },
-  spinnerContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 100,
-  },
-  plansListContainer: {
-    marginBottom: 20,
-  },
-  planCard: {
-    backgroundColor: 'white',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  planHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  planPrice: {
-    color: '#E53E3E',
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  validityText: {
-    fontSize: 14,
-    color: '#718096',
-    marginTop: 4,
-  },
-  rechargeButton: {
-    backgroundColor: '#E53E3E',
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-  },
-  rechargeButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#EDF2F7',
-    marginVertical: 12,
-  },
-  planDetails: {
-    marginTop: 8,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  bulletIcon: {
-    marginRight: 8,
-  },
-  planDetailItem: {
-    fontSize: 15,
-    color: '#4A5568',
-    flex: 1,
-  },
-  noPlansContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 32,
-  },
-  noPlansText: {
-    color: '#718096',
-    fontSize: 16,
-    marginTop: 16,
-  },
-  errorContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 48,
-  },
-  errorMessage: {
-    color: '#E53E3E',
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 16,
-    textAlign: 'center',
-    paddingHorizontal: 24,
-  },
-  retryButton: {
-    backgroundColor: '#E53E3E',
-    borderRadius: 6,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    marginTop: 16,
-  },
-  retryButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
