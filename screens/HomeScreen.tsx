@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -12,10 +12,15 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import RechargeGrid from '../components/RechargeGrid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { setToken, setUserId } from '../config';
+import { API_TOKEN, setToken, setUserId } from '../config';
 import { useWallet } from '../hooks/useWallet';
+import { useCategories } from '../hooks/useCategories';
 
 const HomeScreen: React.FC = () => {
+
+   const [tokenn, setTokenn] = useState<string>("");
+
+  
   useEffect(() => {
     const getUserData = async () => {
       const stored = await AsyncStorage.getItem('userData');
@@ -24,6 +29,7 @@ const HomeScreen: React.FC = () => {
         console.log('User Data:', userData);
         setToken(userData.token);
         setUserId(userData?.user?.userId);
+         setTokenn(userData.token); // ✅ yahan state update hoga
       }
     };
 
@@ -85,7 +91,7 @@ const HomeScreen: React.FC = () => {
         </View>
 
         {/* Recharge Grid Component */}
-        <RechargeGrid />
+        <RechargeGrid token={tokenn} />
       </ScrollView>
     </View>
   );

@@ -291,7 +291,8 @@ import {
   TouchableOpacity,
   ScrollView,
   SafeAreaView,
-  Platform
+  Platform,
+  Alert
 } from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import type {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -320,7 +321,9 @@ const RechargeDetailScreen1 = () => {
   
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RechargeDetailRouteProp>();
-  const {plan, mobileNumber, circleData, operatorData} = route.params;
+  const {plan, mobileNumber, circleData, operatorData,categoryId} = route.params;
+
+  // Alert.alert(categoryId);
 
   // Handle payment process
   const handlePayment = async () => {
@@ -481,37 +484,6 @@ const RechargeDetailScreen1 = () => {
         </TouchableOpacity>
       </View>
 
-      {/* MPIN Modal
-      <MPINModal
-        visible={showMpinModal}
-        onClose={() => setShowMpinModal(false)}
-        circleData={circleData}
-        operatorData={operatorData}
-        mobile={mobileNumber}
-        amount={plan?.rs}
-        onSuccess={data => {
-          const readableDate = new Date(data?.createdAt).toLocaleString();
-          navigation.navigate('PaymentReceipt1', {
-            transactionId: data?.api_txn_id,
-            amount: data?.price,
-            timestamp: readableDate,
-            mobile: data?.mobile,
-          });
-        }}
-        onFailure={data => {
-          const readableDate = new Date(data?.createdAt).toLocaleString();
-          navigation.navigate('PaymentReceiptFail', {
-            transactionId: data?.api_txn_id,
-            amount: data?.price,
-            timestamp: readableDate,
-            mobile: data?.mobile,
-          });
-        }}
-
-
-
-      /> */}
-
 
 
       {/* MPIN Modal */}
@@ -519,7 +491,7 @@ const RechargeDetailScreen1 = () => {
      visible={showMpinModal}
      onClose={() => setShowMpinModal(false)}
      apiToken={API_TOKEN}
-    
+    categoryId={categoryId}
      circleData={circleData}
      operatorData={operatorData}
      mobile={mobileNumber}

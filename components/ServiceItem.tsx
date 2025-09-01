@@ -1,5 +1,5 @@
-import React from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import React from "react";
+import { TouchableOpacity, View, Text } from "react-native";
 
 type ServiceItemProps = {
   icon: React.ReactNode;
@@ -8,33 +8,17 @@ type ServiceItemProps = {
 };
 
 const ServiceItem = ({ icon, label, onPress }: ServiceItemProps) => (
-  <TouchableOpacity style={styles.serviceBoxGrid} onPress={onPress}>
-    <View style={styles.iconWrapper}>{icon}</View>
-    <Text style={styles.serviceText}>{label}</Text>
+  <TouchableOpacity
+    onPress={onPress}
+    className="w-[30%] items-center mb-5"
+  >
+    <View className="bg-[#f5f5f5] p-4 rounded-full justify-center items-center shadow">
+      {icon}
+    </View>
+    <Text className="text-xs font-bold text-[#333] mt-2 text-center">
+      {label}
+    </Text>
   </TouchableOpacity>
 );
-
-const styles = StyleSheet.create({
-  serviceBoxGrid: {
-    width: '30%',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  iconWrapper: {
-    backgroundColor: '#f5f5f5',
-    padding: 16,
-    borderRadius: 50,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 2,
-  },
-  serviceText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#333',
-    marginTop: 8,
-    textAlign: 'center',
-  },
-});
 
 export default ServiceItem;

@@ -15,32 +15,48 @@ import PaymentOptionsScreen from '../screens/PaymentOptionsScreen';
 import PaymentReceipt from '../screens/PaymentReceipt';
 import PaymentReceipt1 from '../screens/PaymentReceipt1';
 import PaymentReceiptFail from '../screens/PaymentReceiptFail';
-import { Circle, Operator } from '../types';
+import {Circle, Operator} from '../types';
+import DrawerNavigation from './DrawerNavigation';
 
 // Root Stack Navigator
 export type RootStackParamList = {
   Login: undefined;
   MainApp: undefined;
-  Recharge: undefined;
+  Recharge: {categoryId:string};
   PlanDetailsScreen: {
     plan: {price: string; days: string; data: string; voice: string};
   };
-   PlanDetailsScreen1: {
-    plan: { rs: number; validity: string; desc: string };
-    mobileNumber: string;   // 👈 ab yaha define kar do
+  PlanDetailsScreen1: {
+    plan: {rs: number; validity: string; desc: string};
+    mobileNumber: string; // 👈 ab yaha define kar do
     operatorData: Operator | null;
     circleData: Circle | null;
+    categoryId:string
   };
   RechargeSuccessScreen: undefined;
   RegisterScreen: {phoneNumber: string};
   PhoneNumberForm: undefined;
   OTPScreen: {phoneNumber: string};
-  PaymentOptionsScreen:undefined;
-  PaymentReceipt: {transactionId: string; amount: string; timestamp: string;mobile: string;};
-  PaymentReceipt1: {transactionId: string; amount: string; timestamp: string;mobile: string;
-     
+  PaymentOptionsScreen: undefined;
+  PaymentReceipt: {
+    transactionId: string;
+    amount: string;
+    timestamp: string;
+    mobile: string;
   };
-   PaymentReceiptFail: {transactionId: string; amount: string; timestamp: string;mobile: string;};
+  PaymentReceipt1: {
+    transactionId: string;
+    amount: string;
+    timestamp: string;
+    mobile: string;
+  };
+  PaymentReceiptFail: {
+    transactionId: string;
+    amount: string;
+    timestamp: string;
+    mobile: string;
+  };
+  Main: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -62,25 +78,23 @@ const RootNavigator = () => {
         </Stack.Screen>
       ) : (
         <>
-               <Stack.Screen name="PhoneNumberForm" component={PhoneNumberForm} />
-               <Stack.Screen
-                 name="PaymentReceipt"
-                 component={PaymentReceipt}
-               />
-             <Stack.Screen
-               name="PaymentReceipt1"
-               component={PaymentReceipt1}
-             />
-            <Stack.Screen
-             name="PaymentReceiptFail"
-             component={PaymentReceiptFail}
-           />
+          <Stack.Screen name="PhoneNumberForm" component={PhoneNumberForm} />
+          <Stack.Screen name="Recharge" component={RechargeScreen} />
+          {/* <Stack.Screen name="MainApp" component={BottomTabs} /> */}
+          <Stack.Screen name="PaymentReceipt" component={PaymentReceipt} />
+          <Stack.Screen name="PaymentReceipt1" component={PaymentReceipt1} />
+          <Stack.Screen
+            name="PaymentReceiptFail"
+            component={PaymentReceiptFail}
+          />
+          <Stack.Screen
+            name="Main"
+            component={DrawerNavigation}
+            options={{headerShown: false}}
+          />
 
-          
-          <Stack.Screen name="MainApp" component={BottomTabs} />
           <Stack.Screen name="OTPScreen" component={OTPScreen} />
           <Stack.Screen name="RegisterScreen" component={RegisterScreen} />
-          <Stack.Screen name="Recharge" component={RechargeScreen} />
           <Stack.Screen
             name="PlanDetailsScreen"
             component={PlanDetailsScreen}

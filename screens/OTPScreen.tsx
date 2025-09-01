@@ -15,7 +15,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 type RootStackParamList = {
   OTPScreen: {phoneNumber: string}; // 👈 yahan phoneNumber bhejenge
   NameAndAadharForm: undefined;
-  MainApp: undefined; // ✅ Add this line
+  Main: undefined; // ✅ Add this line
 };
 
 type Props = NativeStackScreenProps<RootStackParamList, 'OTPScreen'>;
@@ -67,12 +67,13 @@ const OTPScreen: React.FC<Props> = ({navigation, route}) => {
         Alert.alert('Success', 'OTP Verified Successfully!');
 
         // ✅ Store response data (e.g. token or user info)
-        await AsyncStorage.setItem('userData', JSON.stringify(data));
+      await AsyncStorage.setItem('userData', JSON.stringify(data));
 
+        
         // ✅ Navigate to tab stack
         navigation.reset({
           index: 0,
-          routes: [{name: 'MainApp'}],
+          routes: [{name: 'Main'}],
         });
       } else {
         Alert.alert('Failed', data.message || 'Invalid OTP');

@@ -95,7 +95,7 @@ export default function PaymentReceipt({route, navigation}: Props) {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.payAgainBtn}
-          onPress={() => navigation.navigate('Recharge')}>
+          onPress={() => navigation.navigate('Recharge',{categoryId:'123'})}>
           <Text style={styles.payAgainText}>Pay again</Text>
         </TouchableOpacity>
       </View>

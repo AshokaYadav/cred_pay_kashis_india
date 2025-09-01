@@ -59,12 +59,12 @@ export default function PaymentReceipt1({route, navigation}: Props) {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.doneBtn}
-          onPress={() => navigation.navigate('MainApp')}>
+          onPress={() => navigation.navigate('Main')}>
           <Text style={styles.doneText}>Done</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.payAgainBtn}
-          onPress={() => navigation.navigate('Recharge')}>
+          onPress={() => navigation.navigate('Recharge',{categoryId:'123'})}>
           <Text style={styles.payAgainText}>Pay again</Text>
         </TouchableOpacity>
       </View>
