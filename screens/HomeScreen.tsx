@@ -12,7 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import RechargeGrid from '../components/RechargeGrid';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { API_TOKEN, setToken, setUserId } from '../config';
+import { API_TOKEN, setToken, setUserData, setUserId } from '../config';
 import { useWallet } from '../hooks/useWallet';
 import { useCategories } from '../hooks/useCategories';
 
@@ -27,6 +27,9 @@ const HomeScreen: React.FC = () => {
       if (stored) {
         const userData = JSON.parse(stored);
         console.log('User Data:', userData);
+
+        setUserData(userData);
+
         setToken(userData.token);
         setUserId(userData?.user?.userId);
          setTokenn(userData.token); // ✅ yahan state update hoga

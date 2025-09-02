@@ -306,7 +306,7 @@ import {useRazorpay} from '../hooks/useRazorpay';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { RootStackParamList } from '../navigation/RootNavigator ';
 import MPINModal from '../components/MPINModal';
-import { API_TOKEN } from '../config';
+import { API_TOKEN, getUserData } from '../config';
 
 type RechargeDetailRouteProp = RouteProp<
   RootStackParamList,
@@ -323,6 +323,12 @@ const RechargeDetailScreen1 = () => {
   const route = useRoute<RechargeDetailRouteProp>();
   const {plan, mobileNumber, circleData, operatorData,categoryId} = route.params;
 
+
+
+     const userData= getUserData();
+
+     console.log(userData);
+
   // Alert.alert(categoryId);
 
   // Handle payment process
@@ -336,7 +342,7 @@ const RechargeDetailScreen1 = () => {
 
       // Create Razorpay order
       const orderData = await createOrder(plan?.rs);
-      
+      //this one is user data .....
       // Prepare Razorpay options
       const razorpayOptions = {
         description: 'Payment for recharge',
@@ -355,6 +361,12 @@ const RechargeDetailScreen1 = () => {
         upi: {
           vpa: orderData?.data?.pa || '',
         },
+        prefill: {
+          name: userData?.user?.name,
+          email: userData?.user?.email,
+          contact:userData?.user?.mobile   // yaha aapka app ka number pass kijiye
+        },
+        
       };
 
       // Initiate Razorpay payment
