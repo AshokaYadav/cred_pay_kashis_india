@@ -476,6 +476,8 @@ export default function MPINModal({
           <Text className="text-gray-800 font-bold">Cancel</Text>
         </TouchableOpacity>
       </View>
+
+      
     </View>
   </View>
 </Modal>

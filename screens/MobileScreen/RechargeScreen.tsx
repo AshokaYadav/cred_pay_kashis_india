@@ -13,16 +13,16 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 // import { RootStackParamList } from "../navigation/RootNavigator";
 import type { NativeStackNavigationProp, NativeStackScreenProps } from "@react-navigation/native-stack";
 
-import LoadingSpinner from "../components/LoadingSpinner";
-import PlansList from "../components/PlansList";
-import NoPlansForCategory from "../components/NoPlansForCategory";
-import ErrorDisplay from "../components/ErrorDisplay";
-import { useWallet } from "../hooks/useWallet";
-import { useCategories } from "../hooks/useCategories";
-import { useMobilePlans } from "../hooks/useMobilePlans";
-import { useSearchPlans } from "../hooks/useSearchPlans";
-import { RootStackParamList } from "../navigation/RootNavigator ";
-import { API_TOKEN } from "../config";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import PlansList from "../../components/PlansList";
+import NoPlansForCategory from "../../components/NoPlansForCategory";
+import ErrorDisplay from "../../components/ErrorDisplay";
+import { useWallet } from "../../hooks/useWallet";
+import { useCategories } from "../../hooks/useCategories";
+import { useMobilePlans } from "../../hooks/useMobilePlans";
+import { useSearchPlans } from "../../hooks/useSearchPlans";
+import { RootStackParamList } from "../../navigation/RootNavigator ";
+import { API_TOKEN } from "../../config";
 // import { useSearchPlans } from "../hooks/useSearchPlans";
 
 // Props
@@ -39,7 +39,7 @@ export default function RechargeScreen() {
   const [searchAmount, setSearchAmount] = useState("");
 
   // ✅ Hooks
-  const { data } = useWallet();
+  // const { data } = useWallet();
   const { categories } = useCategories(API_TOKEN);
   const {
     plansData,

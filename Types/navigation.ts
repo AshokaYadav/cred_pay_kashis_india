@@ -13,6 +13,13 @@ export type BottomTabParamList = {
 
 export type DrawerParamList = {
   BottomTabs: undefined;
+  HelpSupport: undefined;
+  AboutUs:undefined;
+  TermsConditionScreen:undefined;
+  PrivacyPolicyScreen:undefined;
+  FaqsScreen:undefined;
+  ReturnRefundScreen:undefined
+  
 };
 
 export type DrawerItemProps = {

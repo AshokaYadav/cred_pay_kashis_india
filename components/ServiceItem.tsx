@@ -10,7 +10,7 @@ type ServiceItemProps = {
 const ServiceItem = ({ icon, label, onPress }: ServiceItemProps) => (
   <TouchableOpacity
     onPress={onPress}
-    className="w-[30%] items-center mb-5"
+    className="w-[25%] items-center mb-5"
   >
     <View className="bg-[#f5f5f5] p-4 rounded-full justify-center items-center shadow">
       {icon}

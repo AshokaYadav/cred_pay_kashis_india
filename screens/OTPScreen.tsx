@@ -1,31 +1,31 @@
-import React, {useState, useRef} from 'react';
+import React, { useState, useRef } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
   Alert,
   Image,
-} from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+  Linking,
+} from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { useVerifyOtp } from "../hooks/useVerifyOtp";
 
-// ✅ Navigation types define
 type RootStackParamList = {
-  OTPScreen: {phoneNumber: string}; // 👈 yahan phoneNumber bhejenge
+  OTPScreen: { phoneNumber: string };
   NameAndAadharForm: undefined;
-  Main: undefined; // ✅ Add this line
+  Main: undefined;
 };
 
-type Props = NativeStackScreenProps<RootStackParamList, 'OTPScreen'>;
+type Props = NativeStackScreenProps<RootStackParamList, "OTPScreen">;
 
-const OTPScreen: React.FC<Props> = ({navigation, route}) => {
-  const {phoneNumber} = route.params; // 👈 yahan se milta hai
-  const [otp, setOtp] = useState<string[]>(Array(4).fill(''));
-  const inputRefs = useRef<TextInput[]>([]);
+const OTPScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { phoneNumber } = route.params;
+  const [otp, setOtp] = useState<string[]>(Array(4).fill(""));
 
-  console.log(phoneNumber);
+  // ✅ Properly typed input refs
+  const inputRefs = useRef<Array<TextInput | null>>([]);
+  const { verifyOtp, loading } = useVerifyOtp();
 
   const handleOTPChange = (index: number, value: string) => {
     const newOtp = [...otp];
@@ -33,135 +33,87 @@ const OTPScreen: React.FC<Props> = ({navigation, route}) => {
     setOtp(newOtp);
 
     // ✅ Auto-focus next input
-    if (value && index < 5) {
+    if (value && index < 3) {
       inputRefs.current[index + 1]?.focus();
+    }
+
+    // ✅ If all 4 digits entered, verify OTP
+    if (newOtp.join("").length === 4) {
+      handleVerifyOTP(newOtp.join(""));
     }
   };
 
-  const handleVerifyOTP = async () => {
-    const enteredOtp = otp.join('');
-
-    if (enteredOtp.length !== 4) {
-      Alert.alert('Error', 'Please enter a valid 4-digit OTP.');
+  const handleVerifyOTP = async (finalOtp: string) => {
+    if (finalOtp.length !== 4) {
+      Alert.alert("Error", "Please enter a valid 4-digit OTP.");
       return;
     }
 
-    try {
-      const response = await fetch(
-        'https://api.recharge.kashishindiapvtltd.com/auth/verify-otp',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            otp: enteredOtp,
-            token: phoneNumber, // 👈 Use actual token if required
-          }),
-        },
-      );
+    const result = await verifyOtp(finalOtp, phoneNumber);
 
-      const data = await response.json();
-
-      if (response.ok) {
-        Alert.alert('Success', 'OTP Verified Successfully!');
-
-        // ✅ Store response data (e.g. token or user info)
-      await AsyncStorage.setItem('userData', JSON.stringify(data));
-
-        
-        // ✅ Navigate to tab stack
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'Main'}],
-        });
-      } else {
-        Alert.alert('Failed', data.message || 'Invalid OTP');
-      }
-    } catch (error) {
-      console.error('OTP verification failed:', error);
-      Alert.alert('Error', 'Something went wrong while verifying OTP.');
+    if (result.success) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "Main" }],
+      });
+    } else {
+      Alert.alert("Failed", result.message);
     }
   };
 
   return (
-    <View style={styles.container}>
-      {/* ✅ इमेज ऐड की */}
-      <Image source={require('../assets/load.jpg')} style={styles.logo} />
-      <Text style={styles.title}>OTP Sent on (+91) {phoneNumber}</Text>
-      <View style={styles.otpContainer}>
+    <View className="flex-1 justify-center items-center p-5 bg-white">
+      {/* Logo */}
+      <Image
+        source={require("../assets/load.jpg")}
+        className="w-82 h-34 mb-5"
+        resizeMode="contain"
+      />
+
+      <Text className="text-xl font-bold text-gray-800 mb-5">
+        OTP Sent On {phoneNumber}
+      </Text>
+
+      {/* OTP Inputs */}
+      <View className="flex-row justify-between mb-5">
         {otp.map((digit, index) => (
           <TextInput
             key={index}
-            ref={el => {
-              if (el) inputRefs.current[index] = el;
+            ref={(el: TextInput | null) => {
+              inputRefs.current[index] = el;
             }}
-            style={styles.otpInput}
-            keyboardType="numeric"
+            className={`w-16 h-16 rounded-full text-center text-lg mx-1 border ${
+              digit
+                ? "bg-green-600 text-white border-green-600"
+                : "bg-white text-black border-gray-300"
+            }`}
+            keyboardType="phone-pad"
             maxLength={1}
             value={digit}
-            onChangeText={value => handleOTPChange(index, value)}
+            onChangeText={(value) => handleOTPChange(index, value)}
           />
         ))}
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleVerifyOTP}>
-        <Text style={styles.buttonText}>Verify OTP</Text>
-      </TouchableOpacity>
-      {/* <Text className="font-bold mb-5 border border-red-500 p-2 text-red-800">
-        OTP Sent on (<Text className="text-blue-600">+91 22{phoneNumber}</Text>)
-      </Text> */}
+
+      {/* Bottom Help Section */}
+      <View className="absolute bottom-0 left-0 right-0 flex-row items-center justify-center gap-4 p-6 border-t border-gray-200 bg-white">
+        <Text className="font-semibold">Need help?</Text>
+        <TouchableOpacity onPress={() => Linking.openURL("tel:+919797517555")}>
+          <Text className="text-green-600 ml-1">📞 Call Us</Text>
+        </TouchableOpacity>
+        <Text className="text-lg">|</Text>
+        <TouchableOpacity
+          onPress={() => Linking.openURL("https://wa.me/919797517555")}
+        >
+          <Text className="text-green-600 ml-1">💬 WhatsApp Us</Text>
+        </TouchableOpacity>
+      </View>
+
+      {loading && (
+        <Text className="mt-3 text-gray-500">Verifying OTP...</Text>
+      )}
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  logo: {
-    width: 300,
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    color: '#333',
-  },
-  otpContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  otpInput: {
-    width: 60,
-    height: 50,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 8,
-    textAlign: 'center',
-    fontSize: 18,
-    marginHorizontal: 5,
-    backgroundColor: '#fff',
-  },
-  button: {
-    backgroundColor: '#00C72C',
-    paddingVertical: 15,
-    borderRadius: 25,
-    alignItems: 'center',
-    width: '100%',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-});
 
 export default OTPScreen;

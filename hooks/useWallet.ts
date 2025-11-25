@@ -1,47 +1,34 @@
-import { useState, useEffect } from "react";
-import { API_TOKEN, API_URL, USER_ID } from "../config";
-// import { API_URL, API_TOKEN, USER_ID } from "react-native-config";
+import { useEffect, useState, useCallback } from "react";
+import { fetchWallet } from "../services/walletService";
+import { Alert } from "react-native";
 
-export const useWallet = () => {
+export const useWallet = (userId: string) => {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
- 
+
+  const loadWallet = useCallback(async () => {
+    if (!userId) return;
+
+    setLoading(true);
+    try {
+      const walletData = await fetchWallet(userId);
+      setData(walletData);
+      setError(null);
+    } catch (err: any) {
+      // console.warn("Wallet fetch error:", err.message);
+      setError(err.message || "Failed to fetch wallet");
+    } finally {
+      setLoading(false);
+    }
+  }, [userId]);
 
   useEffect(() => {
-    console.log(API_TOKEN);
-    console.log(API_URL);
-    console.log(USER_ID);
-    const fetchWallet = async () => {
-      try {
-        const response = await fetch(`${API_URL}/wallet/getByUserId`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${API_TOKEN}`,
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: new URLSearchParams({
-            userId: USER_ID,
-          }).toString(),
-        });
+    if (userId) {
+      loadWallet();
+    }
+  }, [userId, loadWallet]);
 
-        const json = await response.json();
-
-        if (json.err) {
-          setError(json.err);
-        } else {
-          setData(json);
-        }
-      } catch (err) {
-        console.error("Wallet fetch error:", err);
-        setError("Failed to fetch wallet data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchWallet();
-  }, []);
-
-  return { data, loading, error };
+  return { data, loading, error, loadWallet };
 };
+

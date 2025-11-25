@@ -1,6 +1,5 @@
+import api from "../lib/axios";
 import { useEffect, useState } from "react";
-import { API_TOKEN } from "../config";
-import { Alert } from "react-native";
 
 type Category = {
   id: string;
@@ -10,34 +9,17 @@ type Category = {
 
 export const useCategories = (token: string) => {
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  console.log(token);
-
   useEffect(() => {
-    
     const fetchCategories = async () => {
-      try {
-        console.log('hi');
-        const response = await fetch(
-          "https://api.recharge.kashishindiapvtltd.com/categories/all",
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`, // 👈 token add here
-            },
-          }
-        );
-
-        const result = await response.json();
-        // Alert.alert('hal')
-        console.log('hi')
-        console.log(result);
-
-        if (result.message === "Success" && result.data) {
-          setCategories(result.data);
+      try {7
+        const response = await api.get("/categories/all", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.data.message === "Success" && response.data.data) {
+          setCategories(response.data.data);
         } else {
           setError("Failed to fetch categories");
         }
