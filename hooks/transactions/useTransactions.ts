@@ -108,6 +108,36 @@ export const useTransactions = ({defaultType = 'Recharges'}: UseTransactionsProp
     }
   };
 
+
+   // 🔹 Fetch Wallet History
+  const fetchLedgerHistory = async () => {
+    setLoading(true);
+    try {
+      const params: any = {
+        page: 1,
+        limit: 25,
+        id: USER_ID,
+        ladger:true,
+        dateRange: {
+          from: startDate || undefined,
+          to: endDate || undefined,
+        },
+      };
+
+      const response = await api.put('/wallet/user/history', params);
+      setData(response.data?.data?.data || []);
+    } catch (err: any) {
+      console.error('Wallet History Error:', err.response?.data || err.message);
+      setData([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
+
+
   // 🔹 Auto fetch when type changes
   useEffect(() => {
       if (selectedItem === 'Recharges') {
@@ -116,7 +146,11 @@ export const useTransactions = ({defaultType = 'Recharges'}: UseTransactionsProp
     } else if(selectedItem === 'Deposits') {
         console.log(selectedItem);
       fetchWalletHistory();
-    }else{
+    }else if(selectedItem === 'LedgerBook'){
+       console.log(selectedItem);
+      fetchLedgerHistory();
+    }
+    else{
         fetchDataComplaints();
     }
   }, [selectedItem]);

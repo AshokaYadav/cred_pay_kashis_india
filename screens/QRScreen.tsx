@@ -22,6 +22,7 @@ import {useTransactions} from '../hooks/transactions/useTransactions';
 import DepositeList from '../components/transations/DepositeList';
 import ComplaintsList from '../components/transations/ComplaintsList';
 import CompliantModal from '../components/transations/ComplaintModal';
+import LedgerBook from '../components/transations/LedgerBook';
 
 const QRScreen = () => {
   const navigation = useNavigation();
@@ -209,6 +210,17 @@ const QRScreen = () => {
 
       {!loading && selectedItem === 'Complaints' && (
         <ComplaintsList
+          data={data}
+          loading={loading}
+          onSelect={item => {
+            setCompSelectedTransaction(item);
+            ComptoggleModal();
+          }}
+        />
+      )}
+
+      {!loading && selectedItem === 'LedgerBook' && (
+        <LedgerBook
           data={data}
           loading={loading}
           onSelect={item => {
